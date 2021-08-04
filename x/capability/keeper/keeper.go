@@ -13,14 +13,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/capability/types"
 )
 
-// initialized is a global variable used by GetCapability to ensure that the memory store
-// and capability map are correctly populated. A state-synced node may copy over all the persistent
-// state and start running the application without having the in-memory state required for x/capability.
-// Thus, we must initialized the memory stores on-the-fly during tx execution once the first GetCapability
-// is called.
-// This is a temporary fix and should be replaced by a more robust solution in the next breaking release.
-var initialized = false
-
 type (
 	// Keeper defines the capability module's keeper. It is responsible for provisioning,
 	// tracking, and authenticating capabilities at runtime. During application
@@ -107,11 +99,10 @@ func (k *Keeper) Seal() {
 	k.sealed = true
 }
 
-// InitMemStore will assure that the module store is a memory store (it will panic if it's not)
-// and willl initialize it. The function is safe to be called multiple times.
-// InitMemStore must be called every time the app starts before the keeper is used (so
-// `BeginBlock` or `InitChain` - whichever is first). We need access to the store so we
-// can't initialize it in a constructor.
+// InitMemStore will initialize the memory store if the initialized flag is not set.
+// InitMemStore logic should be run in first `BeginBlock` or `InitChain` (whichever is run on app start)
+// so that the memory store is properly initialized before any transactions are run.
+// InitMemStore also asserts the memory store type is correct, and will panic if it does not have store type of `StoreTypeMemory`.
 func (k *Keeper) InitMemStore(ctx sdk.Context) {
 	memStore := ctx.KVStore(k.memKey)
 	memStoreType := memStore.GetStoreType()
@@ -145,7 +136,7 @@ func (k *Keeper) InitMemStore(ctx sdk.Context) {
 	}
 }
 
-// IsInitialized returns true if the keeper is properly initialized, and false otherwise.
+// IsInitialized returns true if the initialized flag is set, and false otherwise
 func (k *Keeper) IsInitialized(ctx sdk.Context) bool {
 	memStore := ctx.KVStore(k.memKey)
 	return memStore.Get(types.KeyMemInitialized) != nil
@@ -370,22 +361,6 @@ func (sk ScopedKeeper) ReleaseCapability(ctx sdk.Context, cap *types.Capability)
 // by name. The module is not allowed to retrieve capabilities which it does not
 // own.
 func (sk ScopedKeeper) GetCapability(ctx sdk.Context, name string) (*types.Capability, bool) {
-	// Create a keeper that will set all in-memory mappings correctly into memstore and capmap if scoped keeper is not initialized yet.
-	// This ensures that the in-memory mappings are correctly filled in, in case this is a state-synced node.
-	// This is a temporary non-breaking fix, a future PR should store the reverse mapping in the persistent store and reconstruct forward mapping and capmap on the fly.
-	if !initialized {
-		// create context with infinite gas meter to avoid app state mismatch.
-		initCtx := ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
-		k := Keeper{
-			cdc:      sk.cdc,
-			storeKey: sk.storeKey,
-			memKey:   sk.memKey,
-			capMap:   sk.capMap,
-		}
-		k.InitializeAndSeal(initCtx)
-		initialized = true
-	}
-
 	if strings.TrimSpace(name) == "" {
 		return nil, false
 	}
