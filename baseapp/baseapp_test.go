@@ -15,6 +15,7 @@ import (
 
 	abci "github.com/celestiaorg/celestia-core/abci/types"
 	"github.com/celestiaorg/celestia-core/libs/log"
+	"github.com/celestiaorg/celestia-core/pkg/consts"
 	tmproto "github.com/celestiaorg/celestia-core/proto/tendermint/types"
 	"github.com/gogo/protobuf/jsonpb"
 	"github.com/stretchr/testify/assert"
@@ -2054,4 +2055,8 @@ func TestBaseApp_PreprocessTxs(t *testing.T) {
 	}
 	res := app.PreprocessTxs(mockTxs)
 	require.Equal(t, mockTxs.Txs, res.Txs)
+}
+
+func TestForkUse(t *testing.T) {
+	fmt.Println(consts.ProofOfUsingFork)
 }

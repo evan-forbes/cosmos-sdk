@@ -52,7 +52,7 @@ require (
 )
 
 replace (
-	github.com/celestiaorg/celestia-core => github.com/evan-forbes/totally-not-a-fork-of-celestia-core v0.0.0-20210915104424-85f837318fd5
+	github.com/celestiaorg/celestia-core => github.com/evan-forbes/totally-not-a-fork-of-celestia-core v0.0.0-20210915113311-038748d6a56d
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.2-alpha.regen.4
 	github.com/golang/mock => github.com/golang/mock v1.4.4
 	google.golang.org/grpc => google.golang.org/grpc v1.33.2
