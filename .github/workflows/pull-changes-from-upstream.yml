@@ -1,4 +1,4 @@
-name: Pull detached upstream from cosmos/cosmos-sdk
+name: Pull upstream from cosmos/cosmos-sdk
 
 
 on:
@@ -18,7 +18,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PULL_UPSTREAM }}
           commit-message: Upstream changes
           title: Upstream changes
           body: |
