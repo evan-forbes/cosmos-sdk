@@ -34,7 +34,7 @@ jobs:
       - name: Reset the default branch with upstream changes
         run: |
           git remote add upstream https://github.com/cosmos/cosmos-sdk.git
-          git fetch upstream release/v0.44.x-release:upstream-release-v0.44.x
+          git fetch upstream release/v0.44.x:upstream-release-v0.44.x
           git reset --hard upstream-release-v0.44.x
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
